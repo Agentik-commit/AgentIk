@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "web_frontend.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "web_frontend.py"
+    }
+  ],
+  "functions": {
+    "web_frontend.py": {
+      "maxDuration": 30
+    }
+  }
+}

@@ -1,0 +1,11 @@
+# @package _global_
+hydra:
+  sweeper:
+    params:
+      bcs: "[n_entities,entropy]"
+
+      n_steps_per_episode: 100, 500
+      seed: range(20,30)
+
+
+sweep_name: exp2

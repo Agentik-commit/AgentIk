@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agentik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <div id="left-panel">
+      <div class="toolbar">
+        <button data-tool="pan">Pan</button>
+        <button data-tool="brush">Brush</button>
+        <button data-tool="erase">Erase</button>
+        <button data-tool="spawn">Spawn</button>
+        <select id="palette"></select>
+        <button id="save-world">Save</button>
+        <button id="load-world">Load</button>
+        <button id="pause">Pause</button>
+        <button id="step">Step</button>
+      </div>
+      <div id="hud"></div>
+      <div id="log"></div>
+    </div>
+    <div id="game"></div>
+    <div id="right-panel">
+      <div id="agent-card"></div>
+    </div>
+  </div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

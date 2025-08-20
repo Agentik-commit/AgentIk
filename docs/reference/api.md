@@ -636,5 +636,5 @@ curl http://localhost:5001/api/status
 For API support and questions:
 
 - **Documentation**: [Full API Spec](/spec/openapi)
-- **GitHub Issues**: [Report bugs](https://github.com/your-org/amorphous-fortress/issues)
-- **Discussions**: [Community Q&A](https://github.com/your-org/amorphous-fortress/discussions)
+- **GitHub Issues**: [Report bugs](https://github.com/Agentik-commit/AgentIk/issues)
+- **Discussions**: [Community Q&A](https://github.com/Agentik-commit/AgentIk/discussions)

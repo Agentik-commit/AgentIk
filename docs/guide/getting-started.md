@@ -32,8 +32,8 @@ git --version   # Should be 2.0.0 or higher
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/amorphous-fortress.git
-cd amorphous-fortress
+git clone https://github.com/Agentik-commit/AgentIk.git
+cd AgentIk
 
 # Verify the structure
 ls -la
@@ -41,7 +41,7 @@ ls -la
 
 You should see:
 ```
-amorphous-fortress/
+AgentIk/
 ├── server.js              # Main Node.js/Express server
 ├── package.json           # Server dependencies
 ├── agentik/               # Phaser simulation app
@@ -154,7 +154,7 @@ You should see the Agentik landing page with:
 Understanding the project layout will help you navigate and contribute:
 
 ```
-amorphous-fortress/
+AgentIk/
 ├── server.js                    # Main Express server
 ├── package.json                 # Server dependencies and scripts
 ├── .env                        # Environment configuration
@@ -313,8 +313,8 @@ npm start
 ### Getting Help
 
 - **Documentation**: Check the [Troubleshooting Guide](/guide/troubleshooting)
-- **GitHub Issues**: [Report bugs and request features](https://github.com/your-org/amorphous-fortress/issues)
-- **Discussions**: [Ask questions](https://github.com/your-org/amorphous-fortress/discussions)
+- **GitHub Issues**: [Report bugs and request features](https://github.com/Agentik-commit/AgentIk/issues)
+- **Discussions**: [Ask questions](https://github.com/Agentik-commit/AgentIk/discussions)
 
 ## Next Steps
 

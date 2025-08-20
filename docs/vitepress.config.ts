@@ -7,6 +7,13 @@ export default defineConfig({
   // Base path for GitHub Pages deployment
   base: process.env.DOCS_BASE || '/',
   
+  // Ignore dead links for localhost URLs and internal links
+  ignoreDeadLinks: [
+    /^http:\/\/localhost/,
+    /^\/guide\//,
+    /^\/spec\//
+  ],
+  
   // Theme configuration
   themeConfig: {
     // Site navigation
@@ -69,7 +76,7 @@ export default defineConfig({
 
     // Social links
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/your-org/amorphous-fortress' }
+      { icon: 'github', link: 'https://github.com/Agentik-commit/AgentIk' }
     ],
 
     // Footer

@@ -1,160 +1,163 @@
-# AGENTIK
-## Artificial Life Simulation Platform
+# Agentik - Artificial Life Simulation Platform
 
-**Agentik** is a sophisticated artificial life simulation platform where autonomous agents think, act, and evolve in real-time. Built for researchers, developers, and anyone fascinated by emergent behavior and artificial intelligence.
+A sophisticated artificial life simulation platform that enables users to create, run, and observe autonomous agent simulations in procedurally generated or custom-designed worlds. Built with Node.js/Express backend and Phaser 3 frontend, Agentik provides a complete ecosystem for artificial life research, education, and experimentation.
 
-## 🎯 Features
+## Features
 
-### Multi-Agent Intelligence
-Every creature has a programmable brain made of decision nodes. Watch them think, decide, and adapt in real-time as they navigate complex environments.
+- **Agent Autonomy**: Advanced AI-driven agents with needs, goals, and decision-making systems
+- **Simulation Engine**: High-performance ECS-based simulation loop with configurable tick rates
+- **World Builder**: Integrated map editor supporting Tiled JSON format and custom tilesets
+- **Persistence**: Save/load simulation templates and runs with database integration
+- **Multiverse Gallery**: Browse and observe public simulation worlds
+- **AI Integration**: Support for multiple AI providers (Ollama, OpenAI, Anthropic, Groq, Custom)
+- **Real-time Visualization**: Phaser 3-powered rendering with live statistics and controls
+- **Modular Architecture**: Clean separation between simulation logic and presentation layer
 
-### Emergent Behavior  
-Simple rules create complex behaviors that emerge naturally. See creatures develop strategies, form groups, and solve problems we never programmed.
+## Architecture Overview
 
-### Evolution Ready
-Built for studying how artificial life adapts and evolves. Researchers use this to understand adaptation, survival, and intelligence emergence.
+```
+┌─────────────────┐    HTTP/WebSocket    ┌─────────────────┐    ┌─────────────────┐
+│   Client (UI)   │ ←──────────────────→ │  Express API    │ ←→ │   Database      │
+│   (Phaser 3)    │                      │   (Node.js)     │    │   (In-Memory/   │
+│                 │                      │                 │    │    Postgres)    │
+└─────────────────┘                      └─────────────────┘    └─────────────────┘
+         │                                       │
+         │                                       │
+         ▼                                       ▼
+┌─────────────────┐                      ┌─────────────────┐
+│  Simulation     │                      │   Map Editor    │
+│   Worker        │                      │   & Assets      │
+│  (ECS + AI)     │                      │                 │
+└─────────────────┘                      └─────────────────┘
+```
 
-## 🚀 Tech Stack
+The system uses a client-server architecture where:
+- **Client**: Phaser 3 handles rendering and user interaction
+- **API**: Express.js serves simulation data and manages persistence
+- **Worker**: ECS-based simulation runs at 10-20Hz for performance
+- **Database**: In-memory storage with optional Postgres/Neon integration
 
-- **Backend**: Node.js + Express
-- **Frontend**: HTML5, CSS3, Vanilla JavaScript
-- **Simulation Engine**: Phaser 3 + TypeScript
-- **Build Tools**: Vite
-- **Architecture**: Component-based with iframe embedding
-
-## 📦 Installation
+## Quickstart
 
 ### Prerequisites
-- Node.js (v16 or higher)
-- npm or yarn
+- Node.js 18+ 
+- npm or pnpm
 
-### Setup
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd amorphous-fortress
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   cd agentik && npm install
+   ```
+
+3. **Environment setup**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+4. **Start development server**
+   ```bash
+   npm run dev          # Start backend server
+   cd agentik && npm run dev  # Start frontend dev server
+   ```
+
+5. **Build for production**
+   ```bash
+   npm run build       # Build frontend assets
+   npm start           # Start production server
+   ```
+
+### Development Commands
+
+- `npm run dev` - Start backend server in development mode
+- `npm run build` - Build frontend assets
+- `npm start` - Start production server
+- `cd agentik && npm run dev` - Start frontend dev server
+- `cd agentik && npm run build` - Build frontend for production
+
+## Environment Variables
+
+| Variable | Purpose | Default | Required |
+|----------|---------|---------|----------|
+| `PORT` | Server port | `5001` | No |
+| `NODE_ENV` | Environment mode | `development` | No |
+| `HOST` | Server host | `0.0.0.0` | No |
+| `APP_NAME` | Application name | `Agentik` | No |
+| `APP_VERSION` | Application version | `1.0.0` | No |
+| `MAX_AGENTS` | Maximum agents per simulation | `1000` | No |
+| `SIMULATION_FPS` | Simulation tick rate | `20` | No |
+| `CANVAS_WIDTH` | Default canvas width | `1200` | No |
+| `CANVAS_HEIGHT` | Default canvas height | `800` | No |
+| `DEBUG` | Enable debug logging | `false` | No |
+| `LOG_LEVEL` | Logging level | `info` | No |
+| `TINYTOWN_URL` | TinyTown integration URL | - | No |
+| `SUPABASE_URL` | Supabase database URL | - | No |
+| `SUPABASE_SERVICE_ROLE` | Supabase service role key | - | No |
+| `DATABASE_URL` | Neon/Postgres connection string | - | No |
+| `CREDENTIALS_KEY` | Encryption key for API credentials | - | No |
+
+## Troubleshooting
+
+### Common Issues
+
+**Map not loading**
+- Check browser console for CORS errors
+- Verify tileset files are accessible
+- Ensure map JSON format is valid Tiled format
+
+**Worker not starting**
+- Check Node.js version (requires 18+)
+- Verify all dependencies are installed
+- Check server logs for error messages
+
+**CORS/CSP issues**
+- Verify security headers in server.js
+- Check iframe embedding permissions
+- Ensure proper Content-Security-Policy
+
+**Database connection**
+- Verify environment variables are set
+- Check database service is running
+- Fallback to in-memory storage if needed
+
+**Assets not loading**
+- Verify Vite build output in `agentik/dist/`
+- Check asset paths in `vite.config.ts`
+- Ensure `base: './'` is set for relative paths
+
+### Performance Optimization
+
+- Reduce `MAX_AGENTS` for large simulations
+- Lower `SIMULATION_FPS` for better performance
+- Use object pooling for frequently created entities
+- Implement spatial partitioning for collision detection
+
+## Documentation
+
+For comprehensive documentation, visit our [docs site](./docs/) or run locally:
+
 ```bash
-# Clone the repository
-git clone [your-repo-url]
-cd amorphous-fortress
-
-# Install main dependencies
+cd docs
 npm install
-
-# Install simulation dependencies
-cd agentik
-npm install
-cd ..
-
-# Build the simulation
-npm run build
+npm run docs:dev
 ```
 
-## 🎮 Running the Application
+## Contributing
 
-### Development Mode
-```bash
-# Start the server
-npm start
-# or
-node server.js
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development guidelines and contribution workflow.
 
-# Open your browser
-http://localhost:5001
-```
+## License
 
-### Production Build
-```bash
-# Build the Phaser simulation
-cd agentik
-npm run build
-cd ..
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
 
-# Start the server
-node server.js
-```
+## Security
 
-## 🏗️ Project Structure
-
-```
-amorphous-fortress/
-├── server.js              # Main Node.js/Express server
-├── package.json           # Server dependencies
-├── agentik/               # Phaser simulation app
-│   ├── src/               # TypeScript source code
-│   │   ├── main.ts        # Entry point
-│   │   └── styles.css     # Simulation styles
-│   ├── dist/              # Built assets (generated)
-│   ├── package.json       # Simulation dependencies
-│   └── vite.config.ts     # Build configuration
-├── templates/             # Legacy Flask templates (unused)
-└── README.md              # This file
-```
-
-## 🎨 Visual Features
-
-- **Animated ASCII Logos**: Two alternating logo styles with smooth transitions
-- **Scrollable Interface**: Professional introduction section with feature cards
-- **Responsive Design**: Optimized for desktop, tablet, and mobile
-- **Terminal Aesthetic**: Green-on-black cyberpunk theme
-- **Real-time Statistics**: Live agent counting and progress visualization
-
-## 🤖 Simulation Features
-
-- **15 Autonomous Agents**: Colorful agents with individual AI brains
-- **Social Behavior**: Agents interact, communicate, and form relationships  
-- **Emergent Patterns**: Complex behaviors arising from simple rules
-- **Real-time Visualization**: Smooth 60fps simulation with Phaser 3
-- **Interactive Controls**: View modes, brush tools, and simulation controls
-- **Mobile Support**: Touch controls with pinch-to-zoom and drag-to-pan
-
-## 🔧 Configuration
-
-### Server Configuration
-- **Port**: 5001 (configurable via `PORT` environment variable)
-- **Host**: 0.0.0.0 (accessible on local network)
-
-### Simulation Configuration
-- **Canvas Size**: 800x600 (responsive)
-- **Agent Count**: 15 (configurable in code)
-- **Update Rate**: 60 FPS target
-
-## 🚢 Deployment
-
-### Local Network Access
-The server runs on `0.0.0.0:5001`, making it accessible to other devices on your local network.
-
-### Production Deployment
-1. Build the simulation: `cd agentik && npm run build`
-2. Set environment variables as needed
-3. Run with a process manager like PM2: `pm2 start server.js`
-
-## 🤝 Contributing
-
-This is a research and educational project. Contributions are welcome for:
-- New agent behaviors and AI algorithms
-- Performance optimizations
-- Mobile experience improvements
-- Documentation and examples
-
-## 📄 License
-
-This project is for educational and research purposes. Please respect any third-party assets and libraries used.
-
-## 🔬 Research Applications
-
-Agentik has been designed for studying:
-- Artificial life and emergent behavior
-- Multi-agent systems and swarm intelligence  
-- Evolutionary algorithms and adaptation
-- Social dynamics in artificial populations
-- Real-time decision making in autonomous systems
-
-## 🎯 Future Roadmap
-
-- [ ] Genetic algorithms for agent evolution
-- [ ] More complex environmental interactions
-- [ ] Agent memory and learning systems
-- [ ] Multi-species ecosystems
-- [ ] Data export for research analysis
-- [ ] WebGL performance optimizations
-
----
-
-**Built with ❤️ for the artificial life research community**
+For security issues, please see [SECURITY.md](./SECURITY.md) for reporting procedures.

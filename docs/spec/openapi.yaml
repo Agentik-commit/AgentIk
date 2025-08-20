@@ -1,0 +1,845 @@
+openapi: 3.0.3
+info:
+  title: Agentik API
+  description: |
+    API for the Agentik artificial life simulation platform.
+    
+    This API provides endpoints for managing simulation templates, running simulations,
+    testing AI models, and handling map assets.
+  version: 1.0.0
+  contact:
+    name: Agentik Team
+    email: support@agentik.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:5001
+    description: Local development server
+  - url: https://your-production-domain.com
+    description: Production server
+
+tags:
+  - name: Simulations
+    description: Simulation template management
+  - name: Runs
+    description: Simulation execution control
+  - name: Models
+    description: AI model testing and inference
+  - name: Maps
+    description: Map editor and asset management
+
+paths:
+  /api/sims/templates:
+    post:
+      tags:
+        - Simulations
+      summary: Create or update a simulation template
+      description: |
+        Creates a new simulation template or updates an existing one.
+        Templates define the world, agents, story, and AI model configuration.
+      operationId: createTemplate
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SimulationTemplate'
+            examples:
+              basic_world:
+                summary: Basic world template
+                value:
+                  name: "Simple Ecosystem"
+                  world:
+                    tiles: []
+                    width: 100
+                    height: 100
+                  agents:
+                    - name: "Herbivore"
+                      type: "plant_eater"
+                      count: 10
+                  story: "A simple ecosystem with herbivores and plants"
+                  model:
+                    provider: "ollama"
+                    model: "llama3.1"
+      responses:
+        '200':
+          description: Template created or updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  template:
+                    $ref: '#/components/schemas/SimulationTemplate'
+        '400':
+          description: Missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    get:
+      tags:
+        - Simulations
+      summary: List simulation templates
+      description: Retrieves all simulation templates for the current user.
+      operationId: listTemplates
+      responses:
+        '200':
+          description: List of templates retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  templates:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SimulationTemplate'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/sims/templates/{id}:
+    get:
+      tags:
+        - Simulations
+      summary: Get a specific simulation template
+      description: Retrieves a specific simulation template by ID.
+      operationId: getTemplate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Template ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Template retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  template:
+                    $ref: '#/components/schemas/SimulationTemplate'
+        '404':
+          description: Template not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    delete:
+      tags:
+        - Simulations
+      summary: Delete a simulation template
+      description: Deletes a specific simulation template by ID.
+      operationId: deleteTemplate
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Template ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Template deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        '404':
+          description: Template not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/runs/start:
+    post:
+      tags:
+        - Runs
+      summary: Start a simulation run
+      description: |
+        Starts a new simulation run using the provided snapshot data.
+        Optionally associates the run with a template.
+      operationId: startRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - snapshot
+              properties:
+                snapshot:
+                  description: Simulation state snapshot
+                  type: object
+                  additionalProperties: true
+                templateId:
+                  description: Optional template ID to associate with the run
+                  type: string
+                  format: uuid
+            examples:
+              basic_run:
+                summary: Basic simulation run
+                value:
+                  snapshot:
+                    agents: []
+                    world: {}
+                    time: 0
+                  templateId: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        '200':
+          description: Simulation run started successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  run:
+                    $ref: '#/components/schemas/SimulationRun'
+        '400':
+          description: Missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/runs/stop:
+    post:
+      tags:
+        - Runs
+      summary: Stop a simulation run
+      description: Stops a running simulation and marks it as completed.
+      operationId: stopRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - runId
+              properties:
+                runId:
+                  description: ID of the run to stop
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Simulation run stopped successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  run:
+                    $ref: '#/components/schemas/SimulationRun'
+        '400':
+          description: Missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Run not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/models/test:
+    post:
+      tags:
+        - Models
+      summary: Test an AI model provider
+      description: |
+        Tests the connection and functionality of an AI model provider.
+        Supports Ollama, Custom HTTP, and other providers.
+      operationId: testModel
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - provider
+                - prompt
+              properties:
+                provider:
+                  description: AI provider type
+                  type: string
+                  enum: [ollama, openai, anthropic, groq, custom]
+                config:
+                  description: Provider-specific configuration
+                  type: object
+                  additionalProperties: true
+                prompt:
+                  description: Test prompt to send to the model
+                  type: string
+                  minLength: 1
+                  maxLength: 1000
+            examples:
+              ollama_test:
+                summary: Test Ollama provider
+                value:
+                  provider: "ollama"
+                  config:
+                    baseUrl: "http://localhost:11434"
+                    model: "llama3.1"
+                  prompt: "Hello, how are you today?"
+              custom_test:
+                summary: Test custom HTTP provider
+                value:
+                  provider: "custom"
+                  config:
+                    baseUrl: "https://api.example.com"
+                    params:
+                      temperature: 0.7
+                  prompt: "Generate a creative story"
+      responses:
+        '200':
+          description: Model test completed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  latencyMs:
+                    description: Response time in milliseconds
+                    type: integer
+                    minimum: 0
+                  outputPreview:
+                    description: First 240 characters of model output
+                    type: string
+        '400':
+          description: Invalid request or provider error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/models/infer:
+    post:
+      tags:
+        - Models
+      summary: Get inference from AI model
+      description: |
+        Gets inference results from an AI model provider.
+        This endpoint is currently a placeholder for future implementation.
+      operationId: getInference
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - provider
+                - prompt
+              properties:
+                provider:
+                  description: AI provider type
+                  type: string
+                  enum: [ollama, openai, anthropic, groq, custom]
+                config:
+                  description: Provider-specific configuration
+                  type: object
+                  additionalProperties: true
+                prompt:
+                  description: Input prompt for inference
+                  type: string
+                  minLength: 1
+                  maxLength: 10000
+      responses:
+        '200':
+          description: Inference completed (placeholder)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: false
+                  error:
+                    type: string
+                    example: "not-implemented"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/maps/save:
+    post:
+      tags:
+        - Maps
+      summary: Save a map draft
+      description: |
+        Saves a map as a draft. Drafts are stored in memory and can be
+        published later to make them publicly accessible.
+      operationId: saveMap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - mapJson
+              properties:
+                id:
+                  description: Optional draft ID for updates
+                  type: string
+                  format: uuid
+                name:
+                  description: Map name
+                  type: string
+                  minLength: 1
+                  maxLength: 100
+                mapJson:
+                  description: Map data in Tiled JSON format
+                  type: object
+                  additionalProperties: true
+      responses:
+        '200':
+          description: Map draft saved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  id:
+                    description: Draft ID
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+                  updated_at:
+                    type: string
+                    format: date-time
+        '400':
+          description: Missing required fields
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/maps/publish:
+    post:
+      tags:
+        - Maps
+      summary: Publish a map draft
+      description: |
+        Publishes a map draft, making it publicly accessible.
+        Published maps are stored as JSON files in the public directory.
+      operationId: publishMap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id
+              properties:
+                id:
+                  description: Draft ID to publish
+                  type: string
+                  format: uuid
+      responses:
+        '200':
+          description: Map published successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  mapKey:
+                    description: Public URL path for the published map
+                    type: string
+                    example: "maps/abc123-def456-ghi789.json"
+        '404':
+          description: Draft not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/maps/{id}:
+    get:
+      tags:
+        - Maps
+      summary: Get a map draft
+      description: Retrieves a map draft by ID.
+      operationId: getMapDraft
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Draft ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Map draft retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  draft:
+                    $ref: '#/components/schemas/MapDraft'
+        '404':
+          description: Draft not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/maps/by-key/{mapKey}:
+    get:
+      tags:
+        - Maps
+      summary: Get a published map
+      description: |
+        Retrieves a published map by its public key.
+        Maps are served as JSON files with proper content type headers.
+      operationId: getPublishedMap
+      parameters:
+        - name: mapKey
+          in: path
+          required: true
+          description: Public map key (e.g., maps/abc123.json)
+          schema:
+            type: string
+            pattern: '^maps/[^/]+\.json$'
+      responses:
+        '200':
+          description: Published map retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '404':
+          description: Map not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/maps/upload-tileset:
+    post:
+      tags:
+        - Maps
+      summary: Upload a tileset image
+      description: |
+        Uploads a tileset image file for use in map creation.
+        Files are stored in the uploads directory and accessible via URL.
+      operationId: uploadTileset
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  description: Tileset image file
+                  type: string
+                  format: binary
+                  accept:
+                    - image/png
+                    - image/jpeg
+                    - image/gif
+      responses:
+        '200':
+          description: Tileset uploaded successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+                  url:
+                    description: Public URL for the uploaded tileset
+                    type: string
+                    example: "/uploads/tilesets/anon/1704067200000-tileset.png"
+        '400':
+          description: No file provided
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    SimulationTemplate:
+      type: object
+      required:
+        - name
+        - world
+        - agents
+        - story
+        - model
+      properties:
+        id:
+          description: Unique template identifier
+          type: string
+          format: uuid
+          readOnly: true
+        owner:
+          description: Template owner identifier
+          type: string
+          readOnly: true
+        name:
+          description: Template name
+          type: string
+          minLength: 1
+          maxLength: 100
+        world:
+          description: World configuration
+          type: object
+          additionalProperties: true
+        agents:
+          description: Agent definitions
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        story:
+          description: Story description
+          type: string
+          maxLength: 1000
+        model:
+          description: AI model configuration
+          type: object
+          additionalProperties: true
+        created_at:
+          description: Creation timestamp
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          description: Last update timestamp
+          type: string
+          format: date-time
+          readOnly: true
+
+    SimulationRun:
+      type: object
+      required:
+        - id
+        - owner
+        - snapshot
+        - status
+        - created_at
+      properties:
+        id:
+          description: Unique run identifier
+          type: string
+          format: uuid
+          readOnly: true
+        owner:
+          description: Run owner identifier
+          type: string
+          readOnly: true
+        template_id:
+          description: Associated template ID
+          type: string
+          format: uuid
+          nullable: true
+        snapshot:
+          description: Simulation state snapshot
+          type: object
+          additionalProperties: true
+        status:
+          description: Run status
+          type: string
+          enum: [running, stopped, completed, failed]
+        created_at:
+          description: Start timestamp
+          type: string
+          format: date-time
+          readOnly: true
+        stopped_at:
+          description: Stop timestamp
+          type: string
+          format: date-time
+          nullable: true
+
+    MapDraft:
+      type: object
+      required:
+        - id
+        - name
+        - mapJson
+        - updated_at
+      properties:
+        id:
+          description: Draft identifier
+          type: string
+          format: uuid
+        name:
+          description: Map name
+          type: string
+        mapJson:
+          description: Map data in Tiled JSON format
+          type: object
+          additionalProperties: true
+        updated_at:
+          description: Last update timestamp
+          type: string
+          format: date-time
+        publishedKey:
+          description: Public key if published
+          type: string
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      required:
+        - ok
+        - error
+      properties:
+        ok:
+          type: boolean
+          example: false
+        error:
+          description: Error message
+          type: string
+          example: "Missing required fields"
+
+  securitySchemes:
+    # Future: Add authentication schemes
+    # apiKey:
+    #   type: apiKey
+    #   in: header
+    #   name: X-API-Key
+
+security: []

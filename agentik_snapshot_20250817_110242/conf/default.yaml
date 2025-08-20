@@ -1,0 +1,5 @@
+# Default configuration for Amorphous Fortress
+seed: 42
+width: 15
+height: 8
+pop_perc: 0.3

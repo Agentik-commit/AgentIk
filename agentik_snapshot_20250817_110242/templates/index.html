@@ -1,0 +1,2058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Agentik - Web Frontend</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: #000;
+            color: #ffffff;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ffffff;
+            text-shadow: 0 0 10px #ffffff;
+        }
+        
+        .top-actions {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .launch-agentik {
+            background: #00ff00;
+            color: #1a1a1a;
+            cursor: pointer;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .launch-agentik:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,255,0,0.3); }
+        
+        .controls {
+            background: #000;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: inline-block;
+            width: 120px;
+            margin-right: 10px;
+        }
+        
+        select, input, button {
+            background: #000;
+            border: 1px solid #00ff00;
+            color: #ffffff;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button, .btn-primary, .btn-secondary {
+            background: #00ff00;
+            color: #1a1a1a;
+            cursor: pointer;
+            margin-right: 10px;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-secondary {
+            background: #333;
+            color: #fff;
+        }
+        
+        .btn-primary:hover, .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 255, 0, 0.3);
+        }
+        
+        button:hover {
+            background: #00cc00;
+        }
+        
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        
+        .simulation-area {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .fortress-display {
+            background: #000;
+            padding: 20px;
+            border-radius: 10px;
+            flex: 1;
+        }
+        
+        .game-world {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            background: 
+                radial-gradient(circle at 20% 80%, #1e3a8a 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, #059669 0%, transparent 50%),
+                linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
+            border: 4px solid #00ff00;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 
+                0 0 30px rgba(0, 255, 0, 0.4),
+                inset 0 0 50px rgba(0, 0, 0, 0.3);
+            perspective: 1000px;
+        }
+        /* Fullscreen fallback */
+        .game-world.fullscreen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw; height: 100vh;
+            z-index: 9999;
+            border-radius: 0;
+            border-width: 0;
+        }
+        
+        .world-tile {
+            position: absolute;
+            width: 32px;
+            height: 32px;
+            background-size: cover;
+            transition: all 0.3s ease;
+        }
+        
+        .tile-grass { 
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><pattern id="grass" patternUnits="userSpaceOnUse" width="8" height="8"><rect width="8" height="8" fill="%23165c33"/><circle cx="2" cy="2" r="1" fill="%231a7f3e"/><circle cx="6" cy="4" r="0.8" fill="%231a7f3e"/><circle cx="4" cy="6" r="0.6" fill="%231a7f3e"/></pattern></defs><rect width="32" height="32" fill="url(%23grass)"/><rect x="0" y="24" width="32" height="8" fill="%23165c33"/><circle cx="8" cy="28" r="2" fill="%231a7f3e"/><circle cx="24" cy="26" r="1.5" fill="%231a7f3e"/></svg>');
+            box-shadow: inset 0 0 8px rgba(26, 127, 62, 0.3);
+        }
+        
+        .tile-water { 
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><filter id="water"><feGaussianBlur stdDeviation="1"/></filter></defs><rect width="32" height="32" fill="%230ea5e9"/><rect x="0" y="0" width="32" height="32" fill="%230ea5e9" filter="url(%23water)"/><circle cx="8" cy="8" r="3" fill="%2338bdf8" opacity="0.6"/><circle cx="24" cy="16" r="2" fill="%2338bdf8" opacity="0.7"/><circle cx="16" cy="24" r="2.5" fill="%2338bdf8" opacity="0.5"/><animateTransform attributeName="transform" type="translate" values="0,0; 2,1; 0,0" dur="3s" repeatCount="indefinite"/></svg>');
+            animation: waterFlow 4s ease-in-out infinite;
+        }
+        
+        .tile-mountain { 
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><linearGradient id="mountain" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:%237f1d1d;stop-opacity:1"/><stop offset="50%" style="stop-color:%23dc2626;stop-opacity:1"/><stop offset="100%" style="stop-color:%23951a1a;stop-opacity:1"/></linearGradient></defs><polygon points="16,2 28,30 4,30" fill="url(%23mountain)"/><polygon points="12,8 20,8 16,2" fill="%23fca5a5"/><polygon points="8,16 24,16 16,8" fill="%23fca5a5"/></svg>');
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .tile-forest {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><radialGradient id="tree"><stop offset="0%" style="stop-color:%23165c33"/><stop offset="100%" style="stop-color:%230f5132"/></radialGradient></defs><rect width="32" height="32" fill="%23165c33"/><circle cx="16" cy="8" r="6" fill="%231a7f3e"/><circle cx="12" cy="12" r="4" fill="%231a7f3e"/><circle cx="20" cy="12" r="4" fill="%231a7f3e"/><rect x="14" y="20" width="4" height="12" fill="%23a16207"/></svg>');
+            animation: treeSway 6s ease-in-out infinite;
+        }
+        
+        .tile-crystal {
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><defs><linearGradient id="crystal"><stop offset="0%" style="stop-color:%23a855f7"/><stop offset="100%" style="stop-color:%238b5cf6"/></radialGradient></defs><polygon points="16,2 22,12 16,22 10,12" fill="url(%23crystal)"/><polygon points="16,6 20,12 16,18 12,12" fill="%23c084fc"/><circle cx="16" cy="12" r="2" fill="%23f3e8ff"/></svg>');
+            animation: crystalGlow 2s ease-in-out infinite;
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+        }
+        
+        @keyframes waterFlow {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-2px) scale(1.02); }
+        }
+        
+        @keyframes treeSway {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(1deg); }
+            75% { transform: rotate(-1deg); }
+        }
+        
+        @keyframes crystalGlow {
+            0%, 100% { filter: brightness(1) drop-shadow(0 0 5px rgba(168, 85, 247, 0.8)); }
+            50% { filter: brightness(1.3) drop-shadow(0 0 15px rgba(168, 85, 247, 1)); }
+        }
+        
+        .agent-sprite {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.9);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+            animation: agentFloat 3s ease-in-out infinite;
+        }
+        
+        .agent-sprite:hover {
+            transform: scale(1.3) rotate(5deg);
+            z-index: 100;
+            filter: drop-shadow(0 8px 25px rgba(0,0,0,0.6));
+        }
+        
+        .agent-duck { 
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><radialGradient id="duckBody"><stop offset="0%" style="stop-color:%23fbbf24"/><stop offset="100%" style="stop-color:%23f59e0b"/></radialGradient><radialGradient id="duckBeak"><stop offset="0%" style="stop-color:%23dc2626"/><stop offset="100%" style="stop-color:%23b91c1c"/></radialGradient></defs><ellipse cx="20" cy="25" rx="15" ry="12" fill="url(%23duckBody)"/><ellipse cx="20" cy="20" rx="12" ry="10" fill="url(%23duckBody)"/><ellipse cx="25" cy="18" rx="8" ry="6" fill="url(%23duckBeak)"/><circle cx="18" cy="18" r="2" fill="%23000000"/><circle cx="22" cy="18" r="2" fill="%23000000"/><circle cx="18" cy="18" r="1" fill="%23ffffff"/><circle cx="22" cy="18" r="1" fill="%23ffffff"/></svg>');
+            animation: duckWaddle 2s ease-in-out infinite;
+        }
+        
+        .agent-amoeba { 
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><radialGradient id="amoeba"><stop offset="0%" style="stop-color:%2310b981"/><stop offset="100%" style="stop-color:%23059669"/></radialGradient></defs><path d="M20,5 Q30,8 35,20 Q30,32 20,35 Q10,32 5,20 Q10,8 20,5 Z" fill="url(%23amoeba)"/><circle cx="15" cy="15" r="3" fill="%23059669"/><circle cx="25" cy="20" r="2" fill="%23059669"/><circle cx="18" cy="25" r="2.5" fill="%23059669"/></svg>');
+            animation: amoebaPulse 4s ease-in-out infinite;
+        }
+        
+        .agent-wanderer { 
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><radialGradient id="wanderer"><stop offset="0%" style="stop-color:%238b5cf6"/><stop offset="100%" style="stop-color:%237c3aed"/></radialGradient></defs><circle cx="20" cy="20" r="18" fill="url(%23wanderer)"/><circle cx="20" cy="20" r="12" fill="%23a855f7"/><circle cx="20" cy="20" r="6" fill="%23c084fc"/><circle cx="20" cy="20" r="2" fill="%23f3e8ff"/><path d="M20,2 L22,18 L20,38 L18,18 Z" fill="%23f3e8ff" opacity="0.6"/></svg>');
+            animation: wandererSpin 8s linear infinite;
+        }
+        
+        .agent-stalker { 
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><radialGradient id="stalker"><stop offset="0%" style="stop-color:%23ef4444"/><stop offset="100%" style="stop-color:%23dc2626"/></radialGradient></defs><polygon points="20,2 30,15 25,35 15,35 10,15" fill="url(%23stalker)"/><polygon points="20,8 26,18 24,30 16,30 14,18" fill="%23fca5a5"/><circle cx="20" cy="20" r="3" fill="%23ffffff"/><circle cx="20" cy="20" r="1" fill="%23dc2626"/></svg>');
+            animation: stalkerHunt 1.5s ease-in-out infinite;
+        }
+        
+        .agent-grass { 
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><defs><radialGradient id="grass"><stop offset="0%" style="stop-color:%2384cc16"/><stop offset="100%" style="stop-color:%2365a30d"/></radialGradient></defs><rect x="18" y="25" width="4" height="15" fill="%23a16207"/><ellipse cx="20" cy="20" rx="8" ry="6" fill="url(%23grass)"/><ellipse cx="18" cy="18" rx="4" ry="3" fill="%23a7f3d0"/><ellipse cx="22" cy="18" rx="4" ry="3" fill="%23a7f3d0"/><ellipse cx="20" cy="16" rx="3" ry="2" fill="%23a7f3d0"/></svg>');
+            animation: grassGrow 5s ease-in-out infinite;
+        }
+        
+        @keyframes agentFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        @keyframes duckWaddle {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(2deg); }
+            75% { transform: rotate(-2deg); }
+        }
+        
+        @keyframes amoebaPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes wandererSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes stalkerHunt {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(5deg); }
+        }
+        
+        @keyframes grassGrow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .agent-status {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            animation: statusPulse 2s ease-in-out infinite;
+        }
+        
+        .status-energy-high { 
+            background: radial-gradient(circle, #10b981 0%, #059669 100%);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.8);
+        }
+        .status-energy-medium { 
+            background: radial-gradient(circle, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.8);
+        }
+        .status-energy-low { 
+            background: radial-gradient(circle, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.8);
+            animation: statusPulse 0.5s ease-in-out infinite;
+        }
+        
+        .status-social-high { 
+            background: radial-gradient(circle, #8b5cf6 0%, #7c3aed 100%);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.8);
+        }
+        .status-social-medium { 
+            background: radial-gradient(circle, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.8);
+        }
+        .status-social-low { 
+            background: radial-gradient(circle, #6b7280 0%, #4b5563 100%);
+            box-shadow: 0 0 15px rgba(107, 114, 128, 0.8);
+        }
+        
+        @keyframes statusPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+        
+        .particle-effect {
+            position: absolute;
+            pointer-events: none;
+            z-index: 50;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: particleFloat 2s ease-out forwards;
+        }
+        
+        @keyframes particleFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(0);
+            }
+        }
+        
+        .chat-bubble {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.85) 100%);
+            color: white;
+            padding: 10px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            max-width: 150px;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid rgba(0, 255, 0, 0.3);
+            box-shadow: 
+                0 0 20px rgba(0, 255, 0, 0.2),
+                inset 0 0 20px rgba(0, 255, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .chat-bubble.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-5px);
+        }
+        
+        .chat-bubble::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid rgba(0, 0, 0, 0.95);
+        }
+        
+        .environmental-effects {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .floating-particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: floatAround 20s linear infinite;
+        }
+        
+        @keyframes floatAround {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        .info-panel {
+            background: #000;
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+        }
+        
+        .info-section {
+            margin-bottom: 20px;
+        }
+        
+        .info-section h3 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+        }
+        
+        .log-entry {
+            background: #000;
+            padding: 5px;
+            margin: 2px 0;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        
+        .entity-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .entity-item {
+            background: #000;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .status.running {
+            background: #004400;
+            color: #00ff00;
+        }
+        
+        .status.stopped {
+            background: #440000;
+            color: #ff0000;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #ffffff;
+        }
+        
+        .error {
+            background: #440000;
+            color: #ff0000;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .intro {
+            background: #000;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .intro p {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #ffffff;
+        }
+        
+        .legend {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #000;
+            border-radius: 5px;
+        }
+        
+        .legend-item {
+            display: inline-block;
+            margin-right: 20px;
+            margin-bottom: 5px;
+        }
+        
+        .legend-symbol {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            text-align: center;
+            line-height: 20px;
+            border: 1px solid #333;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+        
+        small {
+            color: #888;
+            font-size: 12px;
+            display: block;
+            margin-top: 5px;
+        }
+        
+        .controls h3 {
+            color: #00ff88;
+            margin-bottom: 15px;
+            text-align: center;
+            padding-bottom: 10px;
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #000;
+            border-radius: 10px;
+        }
+        
+        .logo-container {
+            position: relative;
+            height: 120px;
+            overflow: hidden;
+        }
+        
+        .logo-first, .logo-second {
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 8px;
+            line-height: 1.2;
+            margin: 0;
+            white-space: pre;
+            overflow-x: auto;
+            text-shadow: 0 0 5px #00ff00;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .logo-second {
+            font-size: 10px;
+            line-height: 1.4;
+        }
+        
+        .logo-first {
+            animation: glitchFirst 2s ease-in-out infinite;
+            position: relative;
+        }
+        
+        .logo-first::before,
+        .logo-first::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        
+        .logo-first::before {
+            animation: glitchBefore 2s ease-in-out infinite;
+            color: #ff00ff;
+            z-index: -1;
+        }
+        
+        .logo-first::after {
+            animation: glitchAfter 2s ease-in-out infinite;
+            color: #00ffff;
+            z-index: -2;
+        }
+        
+        .logo-second {
+            animation: glitchSecond 2s ease-in-out infinite;
+            position: relative;
+        }
+        
+        .logo-second::before,
+        .logo-second::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        }
+        
+        .logo-second::before {
+            animation: glitchBefore 2s ease-in-out infinite;
+            color: #ff00ff;
+            z-index: -1;
+        }
+        
+        .logo-second::after {
+            animation: glitchAfter 2s ease-in-out infinite;
+            color: #00ffff;
+            z-index: -2;
+        }
+        
+        @keyframes glitchFirst {
+            0%, 25% {
+                opacity: 1;
+                transform: translate(0);
+                filter: hue-rotate(0deg) brightness(1);
+            }
+            26%, 30% {
+                opacity: 0.9;
+                transform: translate(-2px, 2px);
+                filter: hue-rotate(45deg) brightness(1.2);
+            }
+            31%, 35% {
+                opacity: 0.7;
+                transform: translate(2px, -2px);
+                filter: hue-rotate(90deg) brightness(0.8);
+            }
+            36%, 40% {
+                opacity: 0.5;
+                transform: translate(-1px, 1px);
+                filter: hue-rotate(180deg) brightness(1.1);
+            }
+            41%, 45% {
+                opacity: 0.3;
+                transform: translate(1px, -1px);
+                filter: hue-rotate(270deg) brightness(0.9);
+            }
+            46%, 50% {
+                opacity: 0.1;
+                transform: translate(-3px, 3px);
+                filter: hue-rotate(360deg) brightness(1.3);
+            }
+            51%, 55% {
+                opacity: 0;
+                transform: translate(3px, -3px);
+                filter: hue-rotate(0deg) brightness(0.7);
+            }
+            56%, 100% {
+                opacity: 0;
+                transform: translate(0);
+                filter: hue-rotate(0deg) brightness(1);
+            }
+        }
+        
+        @keyframes glitchSecond {
+            0%, 25% {
+                opacity: 0;
+                transform: translate(0);
+                filter: hue-rotate(0deg) brightness(1);
+            }
+            26%, 30% {
+                opacity: 0.1;
+                transform: translate(2px, -2px);
+                filter: hue-rotate(45deg) brightness(1.2);
+            }
+            31%, 35% {
+                opacity: 0.3;
+                transform: translate(-2px, 2px);
+                filter: hue-rotate(90deg) brightness(0.8);
+            }
+            36%, 40% {
+                opacity: 0.5;
+                transform: translate(1px, -1px);
+                filter: hue-rotate(180deg) brightness(1.1);
+            }
+            41%, 45% {
+                opacity: 0.7;
+                transform: translate(-1px, 1px);
+                filter: hue-rotate(270deg) brightness(0.9);
+            }
+            46%, 50% {
+                opacity: 0.9;
+                transform: translate(3px, -3px);
+                filter: hue-rotate(360deg) brightness(1.3);
+            }
+            51%, 55% {
+                opacity: 1;
+                transform: translate(-3px, 3px);
+                filter: hue-rotate(0deg) brightness(0.7);
+            }
+            56%, 100% {
+                opacity: 1;
+                transform: translate(0);
+                filter: hue-rotate(0deg) brightness(1);
+            }
+        }
+        
+        .what-is-this {
+            background: #000;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .what-is-this h3 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            font-size: 24px;
+        }
+        
+        .capabilities {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .capability {
+            background: #000;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .capability:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+        }
+        
+        .capability h4 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .capability p {
+            color: #ffffff;
+            line-height: 1.6;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .capability-demo {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .research-highlight {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .research-highlight h4 {
+            color: #ffffff;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        
+        .research-highlight p {
+            color: #ffffff;
+            line-height: 1.6;
+            font-size: 14px;
+        }
+        
+        /* New simulation area styles */
+        .main-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .control-section {
+            background: #000;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .control-section h3 {
+            color: #ffffff;
+            margin-bottom: 20px;
+            text-align: center;
+            padding-bottom: 10px;
+        }
+        
+        .scenario-selector, .world-selector {
+            margin-bottom: 20px;
+        }
+        
+        .scenario-selector label, .world-selector label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffffff;
+            font-weight: bold;
+        }
+        
+        .scenario-preview, .world-preview {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            min-height: 60px;
+        }
+        
+        .control-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .control-item {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .control-item label {
+            color: #00ff88;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-primary, .btn-secondary {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00ff00, #00cc00);
+            color: #000;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #00cc00, #009900);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #333, #555);
+            color: #00ff00;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #444, #666);
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary:disabled {
+            background: #222;
+            color: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Simulation area styles */
+        .simulation-area {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .main-simulation {
+            background: #000;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .simulation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+        }
+        
+        .simulation-header h3 {
+            color: #ffffff;
+            margin: 0;
+        }
+        
+        .simulation-stats {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat-label {
+            display: block;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            display: block;
+            font-size: 18px;
+            font-weight: bold;
+            color: #00ff00;
+        }
+        
+        .view-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .view-btn {
+            padding: 8px 16px;
+            background: #000;
+            border: 1px solid #333;
+            color: #ffffff;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .view-btn.active, .view-btn:hover {
+            background: #00ff00;
+            color: #000;
+            border-color: #00ff00;
+        }
+        
+        .simulation-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .sidebar-section {
+            background: #000;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .sidebar-section h3 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+        }
+        
+        .entity-dashboard {
+            min-height: 150px;
+        }
+        
+        .no-entities {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        
+        .no-entities .icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .analytics {
+            text-align: center;
+        }
+        
+        .chart-container {
+            background: #000;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .metrics {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .metric {
+            text-align: left;
+        }
+        
+        .metric-label {
+            display: block;
+            color: #ccc;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .metric-bar {
+            background: #333;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .metric-fill {
+            background: linear-gradient(90deg, #00ff00, #00ff88);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .live-feed {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .feed-item {
+            background: #000;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        
+        .chat-system {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .chat-log {
+            width: 300px;
+            height: 400px;
+            background: #000;
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 15px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+        }
+        
+        .chat-entry {
+            margin-bottom: 8px;
+            padding: 5px;
+            border-radius: 5px;
+            background: rgba(0, 255, 0, 0.1);
+        }
+        
+        .chat-timestamp {
+            color: #00ff88;
+            font-size: 10px;
+            margin-right: 8px;
+        }
+        
+        .chat-speaker {
+            color: #00ff00;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        .chat-message {
+            color: #ffffff;
+        }
+        
+        .chat-action {
+            color: #ffaa00;
+            font-style: italic;
+        }
+        
+        .chat-event {
+            color: #ff8800;
+            font-weight: bold;
+        }
+        
+        .conversations-panel {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .conversation-item {
+            background: #000;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 3px solid #00ff00;
+        }
+        
+        .conversation-participants {
+            font-weight: bold;
+            color: #00ff00;
+            margin-bottom: 5px;
+        }
+        
+        .conversation-message {
+            font-size: 11px;
+            margin: 3px 0;
+            padding: 2px 0;
+        }
+        
+        .social-events {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .event-item {
+            background: #000;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border-left: 3px solid #ff8800;
+        }
+        
+        .event-type {
+            font-weight: bold;
+            color: #ff8800;
+            margin-bottom: 5px;
+        }
+        
+        .event-description {
+            font-size: 11px;
+            line-height: 1.4;
+        }
+        
+        .no-conversations, .no-events {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+        
+        .no-conversations .icon, .no-events .icon {
+            font-size: 24px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        
+        .timestamp {
+            color: #ffffff;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .loading-animation {
+            font-size: 48px;
+            animation: pulse 2s ease-in-out infinite;
+            margin-bottom: 15px;
+        }
+        
+        @keyframes glitchBefore {
+            0%, 25% {
+                transform: translate(0);
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            }
+            26%, 30% {
+                transform: translate(-2px, 2px);
+                clip-path: polygon(0 20%, 100% 20%, 100% 80%, 0 80%);
+            }
+            31%, 35% {
+                transform: translate(2px, -2px);
+                clip-path: polygon(20% 0, 80% 0, 80% 100%, 20% 100%);
+            }
+            36%, 40% {
+                transform: translate(-1px, 1px);
+                clip-path: polygon(0 40%, 100% 40%, 100% 60%, 0 60%);
+            }
+            41%, 45% {
+                transform: translate(1px, -1px);
+                clip-path: polygon(40% 0, 60% 0, 60% 100%, 40% 100%);
+            }
+            46%, 50% {
+                transform: translate(-3px, 3px);
+                clip-path: polygon(0 10%, 100% 10%, 100% 90%, 0 90%);
+            }
+            51%, 55% {
+                transform: translate(3px, -3px);
+                clip-path: polygon(10% 0, 90% 0, 90% 100%, 10% 100%);
+            }
+            56%, 100% {
+                transform: translate(0);
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            }
+        }
+        
+        @keyframes glitchAfter {
+            0%, 25% {
+                transform: translate(0);
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            }
+            26%, 30% {
+                transform: translate(2px, -2px);
+                clip-path: polygon(0 30%, 100% 30%, 100% 70%, 0 70%);
+            }
+            31%, 35% {
+                transform: translate(-2px, 2px);
+                clip-path: polygon(30% 0, 70% 0, 70% 100%, 30% 100%);
+            }
+            36%, 40% {
+                transform: translate(1px, -1px);
+                clip-path: polygon(0 50%, 100% 50%, 100% 50%, 0 50%);
+            }
+            41%, 45% {
+                transform: translate(-1px, 1px);
+                clip-path: polygon(50% 0, 50% 0, 50% 100%, 50% 100%);
+            }
+            46%, 50% {
+                transform: translate(3px, -3px);
+                clip-path: polygon(0 5%, 100% 5%, 100% 95%, 0 95%);
+            }
+            51%, 55% {
+                transform: translate(-3px, 3px);
+                clip-path: polygon(5% 0, 95% 0, 95% 100%, 5% 100%);
+            }
+            56%, 100% {
+                transform: translate(0);
+                clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <div class="logo-container">
+                <pre class="logo-first single" data-text="_____/\\\\\________/\\\\\\__/\\\\\\\\\__/\\\\\_____/\\\__/\\\\\\\\\__/\\\\\\\__/\\\_______/\\\_        
+  ___/\\\\\\\\\____/\\\//////////__\/\\\///////////__\/\\\\\\___\/\\\_\///////\\\/////__\/////\\\///__\///\\\___/\\\/__       
+   __/\\\/////////\\\__/\\\_____________\/\\\_____________\/\\\/\\\__\/\\\_______\/\\\___________\/\\\_______\///\\\\\/____      
+    _\/\\\_______\/\\\_\/\\\____/\\\\\\\_\/\\\\\\\\\_____\/\\\//\\\_\/\\\_______\/\\\___________\/\\\_________\//\\\\______     
+     _\/\\\\\\\\\\\\\\\_\/\\\___\/////\\\_\/\\\///////______\/\\\\//\\\\/\\\_______\/\\\___________\/\\\__________\/\\\\______    
+      _\/\\\/////////\\\_\/\\\_______\/\\\_\/\\\_____________\/\\\_\//\\\/\\\_______\/\\\___________\/\\\__________/\\\\\\_____   
+       _\/\\\_______\/\\\_\/\\\_______\/\\\_\/\\\_____________\/\\\__\//\\\\\\_______\/\\\___________\/\\\________/\\\////\\\___  
+        _\/\\\_______\/\\\_\//\\\\\\\\\\\\/__\/\\\\\\\\\\\\\\\_\/\\\___\//\\\\\_______\/\\\________/\\\\\\\\\__/\\\/___\///\\\_ 
+         _\///________\///___\////////////____\///////////////__\///_____\/////________\///________\///////////__\///_______\///__">_____/\\\\\________/\\\\\\__/\\\\\\\\\__/\\\\\_____/\\\__/\\\\\\\\\__/\\\\\\\__/\\\_______/\\\_        
+  ___/\\\\\\\\\____/\\\//////////__\/\\\///////////__\/\\\\\\___\/\\\_\///////\\\/////__\/////\\\///__\///\\\___/\\\/__       
+   __/\\\/////////\\\__/\\\_____________\/\\\_____________\/\\\/\\\__\/\\\_______\/\\\___________\/\\\_______\///\\\\\/____      
+    _\/\\\_______\/\\\_\/\\\____/\\\\\\\_\/\\\\\\\\\_____\/\\\//\\\_\/\\\_______\/\\\___________\/\\\_________\//\\\\______     
+     _\/\\\\\\\\\\\\\\\_\/\\\___\/////\\\_\/\\\///////______\/\\\\//\\\\/\\\_______\/\\\___________\/\\\__________\/\\\\______    
+      _\/\\\/////////\\\_\/\\\_______\/\\\_\/\\\_____________\/\\\_\//\\\/\\\_______\/\\\___________\/\\\__________/\\\\\\_____   
+       _\/\\\_______\/\\\_\/\\\_______\/\\\_\/\\\_____________\/\\\__\//\\\\\\_______\/\\\___________\/\\\________/\\\////\\\___  
+        _\/\\\_______\/\\\_\//\\\\\\\\\\\\/__\/\\\\\\\\\\\\\\\_\/\\\___\//\\\\\_______\/\\\________/\\\\\\\\\__/\\\/___\///\\\_ 
+         _\///________\///___\////////////____\///////////////__\///_____\/////________\///________\///////////__\///_______\///__</pre>
+                
+                <pre class="logo-second single" data-text="                                                                            
+   _|_|      _|_|_|  _|_|_|_|  _|      _|  _|_|_|_|_|  _|_|_|  _|      _|  
+ _|    _|  _|        _|        _|_|    _|      _|        _|      _|  _|    
+ _|_|_|_|  _|  _|_|  _|_|_|    _|  _|  _|      _|        _|        _|      
+ _|    _|  _|    _|  _|        _|    _|_|      _|        _|      _|  _|    
+ _|    _|    _|_|_|  _|_|_|_|  _|      _|      _|      _|_|_|  _|      _|  
+                                                                            
+                                                                            ">                                                                            
+   _|_|      _|_|_|  _|_|_|_|  _|      _|  _|_|_|_|_|  _|_|_|  _|      _|  
+ _|    _|  _|        _|        _|_|    _|      _|        _|      _|  _|    
+ _|_|_|_|  _|  _|_|  _|_|_|    _|  _|  _|      _|        _|        _|      
+ _|    _|  _|    _|  _|        _|    _|_|      _|        _|      _|  _|    
+ _|    _|    _|_|_|  _|_|_|_|  _|      _|      _|      _|_|_|  _|      _|  
+                                                                            
+                                                                            </pre>
+            </div>
+        </div>
+        
+        <div class="intro">
+            <div class="intro-content">
+                <h2>Welcome to the Future of Artificial Life!</h2>
+                <p>This isn't just another simulation - it's a living, breathing digital ecosystem where artificial creatures evolve, adapt, and create emergent behaviors that even we can't predict!</p>
+                
+                <div class="feature-highlights">
+                    <div class="feature">
+                        <strong>Finite State Machines</strong>
+                        <span>Each creature has a brain made of decision nodes</span>
+                    </div>
+                    <div class="feature">
+                        <strong>Emergent Behavior</strong>
+                        <span>Simple rules create complex, unexpected patterns</span>
+                    </div>
+                    <div class="feature">
+                        <strong>Evolution Ready</strong>
+                        <span>Built for studying how life adapts and evolves</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="main-controls">
+            <div class="control-section">
+                <h3>Choose Your Adventure</h3>
+                
+                <div class="scenario-selector">
+                    <label for="testEnv">Quick Scenarios:</label>
+                    <select id="testEnv">
+                        <option value="">Pick a scenario...</option>
+                    </select>
+                    <div class="scenario-preview" id="scenarioPreview">
+                        <p>Select a scenario to see what it does!</p>
+                    </div>
+                </div>
+                
+                <div class="world-selector">
+                    <label for="fortressFile">Custom Worlds:</label>
+                    <select id="fortressFile">
+                        <option value="">Load a world...</option>
+                    </select>
+                    <div class="world-preview" id="worldPreview">
+                        <p>Select a world to see its layout!</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Fine-Tune Your Experience</h3>
+                
+                <div class="control-row">
+                    <div class="control-item">
+                        <label for="seed">World Seed:</label>
+                        <input type="number" id="seed" placeholder="Random">
+                        <small>Same seed = same world every time</small>
+                    </div>
+                    
+                    <div class="control-item">
+                        <label for="renderSpeed">Speed:</label>
+                        <input type="range" id="renderSpeed" min="0.05" max="1.0" step="0.05" value="0.1">
+                        <span id="speedValue">0.1s</span>
+                    </div>
+                </div>
+                
+                <div class="control-row">
+                    <div class="control-item">
+                        <label for="viewMode">View Mode:</label>
+                        <select id="viewMode">
+                            <option value="normal">Normal View</option>
+                            <option value="heatmap">Behavior Heatmap</option>
+                            <option value="paths">Movement Paths</option>
+                            <option value="states">State Changes</option>
+                        </select>
+                    </div>
+                    
+                    <div class="control-item">
+                        <label for="cameraMode">Camera:</label>
+                        <select id="cameraMode">
+                            <option value="follow">Follow Entity</option>
+                            <option value="overview">Overview</option>
+                            <option value="zoom">Auto-Zoom</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>Take Control</h3>
+                <div class="action-buttons">
+                    <button id="startBtn" class="btn-primary">Launch Simulation</button>
+                    <button id="stopBtn" class="btn-secondary" disabled>Pause</button>
+                    <button id="stepBtn" class="btn-secondary" disabled>Step Forward</button>
+                    <button id="resetBtn" class="btn-secondary">Reset</button>
+                    <button id="fullscreenBtn" class="btn-secondary">Maximize</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="status" class="status stopped">Simulation Stopped</div>
+        
+        <div class="chat-system">
+            <div class="chat-log" id="chatLog">
+                <div class="chat-entry">
+                    <span class="chat-timestamp">00:00</span>
+                    <span class="chat-event">🌍 World initialized! Agents are waking up...</span>
+                </div>
+            </div>
+            
+            <div class="game-world" id="gameWorld">
+                <!-- 2D world tiles and agent sprites will be rendered here -->
+            </div>
+        </div>
+        
+        <div class="simulation-area">
+            <div class="main-simulation">
+                <div class="simulation-header">
+                    <h3>Living World</h3>
+                    <div class="simulation-stats">
+                        <div class="stat">
+                            <span class="stat-label">Time</span>
+                            <span class="stat-value" id="stepCount">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Life</span>
+                            <span class="stat-value" id="entityCount">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Size</span>
+                            <span class="stat-value" id="dimensions">0x0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Activity</span>
+                            <span class="stat-value" id="activityLevel">0%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="fortress-container">
+                    <div class="view-controls">
+                        <button class="view-btn active" data-view="normal">Normal</button>
+                        <button class="view-btn" data-view="heatmap">Heatmap</button>
+                        <button class="view-btn" data-view="paths">Paths</button>
+                        <button class="view-btn" data-view="states">States</button>
+                    </div>
+                    
+                    <div class="fortress-display">
+                        <div class="legend">
+                            <div class="legend-item"><span class="legend-symbol cell-empty">·</span> Empty</div>
+                            <div class="legend-item"><span class="legend-symbol cell-wall">█</span> Wall</div>
+                            <div class="legend-item"><span class="legend-symbol cell-entity">E</span> Creature</div>
+                            <div class="legend-item"><span class="legend-symbol cell-item">★</span> Item</div>
+                        </div>
+                        <div id="gameWorld" class="game-world">
+                            <!-- 2D world tiles and agent sprites will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="simulation-sidebar">
+                <div class="sidebar-section">
+                    <h3>Active Entities</h3>
+                    <div class="entity-dashboard" id="entityDashboard">
+                        <div id="entityList">
+                            <div class="no-entities">
+                                <span class="icon">No creatures yet</span>
+                                <p>No creatures yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3>Live Analytics</h3>
+                    <div class="analytics">
+                        <div class="chart-container">
+                            <canvas id="activityChart" width="200" height="100"></canvas>
+                        </div>
+                        <div class="metrics">
+                            <div class="metric">
+                                <span class="metric-label">Movement</span>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" id="movementBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">Interactions</span>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" id="interactionBar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div class="metric">
+                                <span class="metric-label">State Changes</span>
+                                <div class="metric-bar">
+                                    <div class="metric-fill" id="stateBar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3>Live Feed</h3>
+                    <div class="live-feed" id="liveFeed">
+                        <div id="logList">
+                            <div class="feed-item">
+                                <span class="timestamp">00:00</span>
+                                <span class="message">World initialized and ready for life!</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3>Agent Conversations</h3>
+                    <div class="conversations-panel" id="conversationsPanel">
+                        <div class="no-conversations">
+                            <span class="icon">No conversations yet</span>
+                            <p>Agents will chat when they get close to each other!</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <h3>Social Events</h3>
+                    <div class="social-events" id="socialEvents">
+                        <div class="no-events">
+                            <span class="icon">No events yet</span>
+                            <p>Watch for group formations and interactions!</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="what-is-this">
+            <h3>This Platform is Revolutionary! Here's Why:</h3>
+            <div class="capabilities">
+                <div class="capability">
+                    <h4>Finite State Machine Brains</h4>
+                    <p>Every creature has a programmable brain made of decision nodes. Watch them think, decide, and adapt in real-time as they navigate complex environments!</p>
+                    <div class="capability-demo">
+                        <span>Try the DUCK scenario to see basic movement logic</span>
+                    </div>
+                </div>
+                
+                <div class="capability">
+                    <h4>Emergent Intelligence</h4>
+                    <p>Simple rules create complex behaviors that emerge naturally. See creatures develop strategies, form groups, and solve problems we never programmed!</p>
+                    <div class="capability-demo">
+                        <span>Try BOKO vs LINK to see pursuit behavior emerge</span>
+                    </div>
+                </div>
+                
+                <div class="capability">
+                    <h4>Evolution & Learning</h4>
+                    <p>This isn't just simulation - it's a platform for studying how artificial life evolves. Researchers use this to understand adaptation, survival, and intelligence!</p>
+                    <div class="capability-demo">
+                        <span>Load HYRULE world to see complex ecosystems</span>
+                    </div>
+                </div>
+                
+                <div class="capability">
+                    <h4>Interactive Research</h4>
+                    <p>Change parameters in real-time, observe behaviors, and discover new patterns. This is cutting-edge artificial life research made accessible!</p>
+                    <div class="capability-demo">
+                        <span>Experiment with different seeds and speeds</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="research-highlight">
+                <h4>Used by Real Researchers!</h4>
+                <p>This platform has been featured in academic papers and is actively used by scientists studying artificial life, emergent behavior, and evolutionary computation. You're not just playing - you're participating in cutting-edge research!</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class Agentix {
+            constructor() {
+                this.simulationRunning = false;
+                this.updateInterval = null;
+                this.init();
+            }
+            
+            init() {
+                this.loadTestEnvironments();
+                this.loadFortressFiles();
+                this.setupEventListeners();
+                this.updateSpeedDisplay();
+            }
+            
+            async loadTestEnvironments() {
+                try {
+                    const response = await fetch('/api/available_tests');
+                    const tests = await response.json();
+                    
+                    const select = document.getElementById('testEnv');
+                    tests.forEach(test => {
+                        const option = document.createElement('option');
+                        option.value = test;
+                        option.textContent = test;
+                        select.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error loading test environments:', error);
+                }
+            }
+            
+            async loadFortressFiles() {
+                try {
+                    const response = await fetch('/api/available_fortresses');
+                    const fortresses = await response.json();
+                    
+                    const select = document.getElementById('fortressFile');
+                    fortresses.forEach(fortress => {
+                        const option = document.createElement('option');
+                        option.value = fortress;
+                        option.textContent = fortress;
+                        select.appendChild(option);
+                    });
+                } catch (error) {
+                    console.error('Error loading fortress files:', error);
+                }
+            }
+            
+            setupEventListeners() {
+                document.getElementById('startBtn').addEventListener('click', () => this.startSimulation());
+                document.getElementById('stopBtn').addEventListener('click', () => this.stopSimulation());
+                document.getElementById('stepBtn').addEventListener('click', () => this.stepSimulation());
+                document.getElementById('resetBtn').addEventListener('click', () => this.resetSimulation());
+                const fsBtn = document.getElementById('fullscreenBtn');
+                if (fsBtn) fsBtn.addEventListener('click', () => this.toggleFullscreen());
+                document.getElementById('renderSpeed').addEventListener('input', (e) => this.updateSpeedDisplay());
+                
+                // Allow both selections to be made independently
+                // No need to clear the other selection
+            }
+            
+            updateSpeedDisplay() {
+                const speed = document.getElementById('renderSpeed').value;
+                document.getElementById('speedValue').textContent = speed + 's';
+            }
+            
+            async startSimulation() {
+                // Directly embed the Agentik Phaser app into the main game area
+                const gameWorld = document.getElementById('gameWorld');
+                gameWorld.innerHTML = '<iframe src="/agentik/?embed=1&mode=procedural" style="width:100%;height:100%;border:0"></iframe>';
+
+                // Update UI state
+                this.simulationRunning = true;
+                this.updateUI();
+            }
+
+            toggleFullscreen() {
+                const container = document.getElementById('gameWorld');
+                const iframe = container.querySelector('iframe');
+                
+                if (!document.fullscreenElement) {
+                    // Add fullscreen CSS class for better styling
+                    container.classList.add('fullscreen');
+                    
+                    // Try to make the container fullscreen
+                    if (container.requestFullscreen) {
+                        container.requestFullscreen().catch(() => {
+                            // Fallback: just use CSS fullscreen
+                            console.log('Fullscreen API not available, using CSS fallback');
+                        });
+                    }
+                    
+                    // Resize iframe to full viewport
+                    if (iframe) {
+                        iframe.style.width = '100vw';
+                        iframe.style.height = '100vh';
+                        // Message the iframe to resize the Phaser game
+                        iframe.contentWindow?.postMessage({type: 'resize', width: window.innerWidth, height: window.innerHeight}, '*');
+                    }
+                } else {
+                    // Exit fullscreen
+                    container.classList.remove('fullscreen');
+                    
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                    }
+                    
+                    // Restore iframe size
+                    if (iframe) {
+                        iframe.style.width = '100%';
+                        iframe.style.height = '100%';
+                        // Message the iframe to resize back
+                        iframe.contentWindow?.postMessage({type: 'resize', width: 800, height: 600}, '*');
+                    }
+                }
+            }
+            
+            async stopSimulation() {
+                try {
+                    await fetch('/api/stop_simulation', { method: 'POST' });
+                    this.simulationRunning = false;
+                    this.updateUI();
+                    this.stopUpdates();
+                } catch (error) {
+                    this.showError('Failed to stop simulation: ' + error.message);
+                }
+            }
+            
+            async stepSimulation() {
+                try {
+                    const response = await fetch('/api/step_simulation', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (result.status === 'success') {
+                        this.renderFortress(result.fortress_state);
+                        this.updateInfo(result.fortress_state);
+                    } else {
+                        this.showError('Failed to step simulation: ' + result.error);
+                    }
+                } catch (error) {
+                    this.showError('Failed to step simulation: ' + error.message);
+                }
+            }
+            
+            resetSimulation() {
+                this.stopSimulation();
+                document.getElementById('testEnv').value = '';
+                document.getElementById('fortressFile').value = '';
+                document.getElementById('seed').value = '';
+                document.getElementById('renderSpeed').value = '0.1';
+                this.updateSpeedDisplay();
+                this.clearDisplay();
+            }
+            
+            startUpdates() {
+                this.updateInterval = setInterval(() => this.updateDisplay(), 100);
+            }
+            
+            stopUpdates() {
+                if (this.updateInterval) {
+                    clearInterval(this.updateInterval);
+                    this.updateInterval = null;
+                }
+            }
+            
+            async updateDisplay() {
+                try {
+                    const response = await fetch('/api/simulation_state');
+                    const state = await response.json();
+                    
+                    if (state.status === 'no_simulation') {
+                        return;
+                    }
+                    
+                    this.renderFortress(state.fortress_state);
+                    this.updateInfo(state.fortress_state);
+                } catch (error) {
+                    console.error('Error updating display:', error);
+                }
+            }
+            
+            renderFortress(state) {
+                const gameWorld = document.getElementById('gameWorld');
+                gameWorld.innerHTML = '';
+                
+                const { width, height, map, entities } = state;
+                
+                // Add environmental effects layer
+                const effectsLayer = document.createElement('div');
+                effectsLayer.className = 'environmental-effects';
+                gameWorld.appendChild(effectsLayer);
+                
+                // Create floating particles
+                for (let i = 0; i < 15; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'floating-particle';
+                    particle.style.left = Math.random() * 100 + '%';
+                    particle.style.animationDelay = Math.random() * 20 + 's';
+                    particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                    effectsLayer.appendChild(particle);
+                }
+                
+                // Create world tiles with enhanced variety
+                for (let y = 0; y < height; y++) {
+                    for (let x = 0; x < width; x++) {
+                        const tile = document.createElement('div');
+                        tile.className = 'world-tile tile-grass';
+                        tile.style.left = (x * 32) + 'px';
+                        tile.style.top = (y * 32) + 'px';
+                        
+                        // Enhanced world generation with more variety
+                        const rand = Math.random();
+                        if (rand < 0.08) {
+                            tile.className = 'world-tile tile-water';
+                        } else if (rand < 0.04) {
+                            tile.className = 'world-tile tile-mountain';
+                        } else if (rand < 0.12) {
+                            tile.className = 'world-tile tile-forest';
+                        } else if (rand < 0.02) {
+                            tile.className = 'world-tile tile-crystal';
+                        }
+                        
+                        gameWorld.appendChild(tile);
+                    }
+                }
+                
+                // Create agent sprites with enhanced positioning
+                entities.forEach(entity => {
+                    const sprite = document.createElement('div');
+                    sprite.className = `agent-sprite agent-${entity.type.toLowerCase()}`;
+                    sprite.textContent = entity.type;
+                    sprite.style.left = (entity.pos[0] * 32 - 4) + 'px';
+                    sprite.style.top = (entity.pos[1] * 32 - 4) + 'px';
+                    
+                    // Add enhanced status indicators
+                    const energyStatus = document.createElement('div');
+                    energyStatus.className = 'agent-status';
+                    if (entity.energy < 30) {
+                        energyStatus.className += ' status-energy-low';
+                    } else if (entity.energy < 60) {
+                        energyStatus.className += ' status-energy-medium';
+                    } else {
+                        energyStatus.className += ' status-energy-high';
+                    }
+                    sprite.appendChild(energyStatus);
+                    
+                    // Add social status indicator
+                    const socialStatus = document.createElement('div');
+                    socialStatus.className = 'agent-status';
+                    socialStatus.style.top = '-12px';
+                    socialStatus.style.right = 'auto';
+                    socialStatus.style.left = '-12px';
+                    if (entity.social < 30) {
+                        socialStatus.className += ' status-social-low';
+                    } else if (entity.social < 60) {
+                        socialStatus.className += ' status-social-medium';
+                    } else {
+                        socialStatus.className += ' status-social-high';
+                    }
+                    sprite.appendChild(socialStatus);
+                    
+                    // Add chat bubble if entity is talking
+                    if (entity.state.includes('social') || entity.state.includes('talking')) {
+                        const chatBubble = document.createElement('div');
+                        chatBubble.className = 'chat-bubble show';
+                        chatBubble.textContent = 'Hello!';
+                        sprite.appendChild(chatBubble);
+                    }
+                    
+                    // Add click event for agent info
+                    sprite.addEventListener('click', () => {
+                        this.showAgentInfo(entity);
+                        this.createParticleEffect(sprite);
+                    });
+                    
+                    gameWorld.appendChild(sprite);
+                });
+            }
+            
+            updateInfo(state) {
+                document.getElementById('stepCount').textContent = state.step;
+                document.getElementById('entityCount').textContent = state.entities.length;
+                document.getElementById('dimensions').textContent = `${state.width}x${state.height}`;
+                
+                            // Update entity list
+            const entityList = document.getElementById('entityList');
+            entityList.innerHTML = '';
+            
+            if (state.entities.length === 0) {
+                entityList.innerHTML = '<div class="loading">No entities</div>';
+            } else {
+                state.entities.forEach(entity => {
+                    const item = document.createElement('div');
+                    item.className = 'entity-item';
+                    
+                    let targetInfo = '';
+                    if (entity.target) {
+                        targetInfo = `<br>Target: ${entity.target.type} at [${entity.target.pos[0]}, ${entity.target.pos[1]}]`;
+                    }
+                    
+                    item.innerHTML = `
+                        <strong>${entity.type}</strong><br>
+                        Position: [${entity.pos[0]}, ${entity.pos[1]}]<br>
+                        State: ${entity.state}<br>
+                        Energy: ${entity.energy}% | Social: ${entity.social}%${targetInfo}
+                    `;
+                    entityList.appendChild(item);
+                });
+            }
+                
+                // Update logs
+                const logList = document.getElementById('logList');
+                logList.innerHTML = '';
+                
+                if (state.logs.length === 0) {
+                    logList.innerHTML = '<div class="loading">No logs</div>';
+                } else {
+                    state.logs.forEach(log => {
+                        const entry = document.createElement('div');
+                        entry.className = 'log-entry';
+                        entry.textContent = log;
+                        logList.appendChild(entry);
+                    });
+                }
+                
+                // Update conversations and add to chat
+                if (state.conversations && state.conversations.length > 0) {
+                    state.conversations.forEach(conv => {
+                        this.addChatEntry('agent', conv.participants.join(' & '), conv.messages[0]);
+                    });
+                }
+                
+                // Update social events and add to chat
+                if (state.social_events && state.social_events.length > 0) {
+                    state.social_events.forEach(event => {
+                        this.addChatEntry('event', event.type, event.description);
+                    });
+                }
+                
+                // Add agent activity to chat
+                state.entities.forEach(entity => {
+                    if (entity.state !== this.lastEntityStates?.[entity.type]) {
+                        this.addChatEntry('action', entity.type, `${entity.type} is now ${entity.state}`);
+                        if (!this.lastEntityStates) this.lastEntityStates = {};
+                        this.lastEntityStates[entity.type] = entity.state;
+                    }
+                });
+            }
+            
+            updateUI() {
+                const startBtn = document.getElementById('startBtn');
+                const stopBtn = document.getElementById('stopBtn');
+                const stepBtn = document.getElementById('stepBtn');
+                const status = document.getElementById('status');
+                
+                if (this.simulationRunning) {
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    stepBtn.disabled = false;
+                    status.textContent = 'Simulation Running';
+                    status.className = 'status running';
+                } else {
+                    startBtn.disabled = false;
+                    stopBtn.disabled = true;
+                    stepBtn.disabled = true;
+                    status.textContent = 'Simulation Stopped';
+                    status.className = 'status stopped';
+                }
+            }
+            
+            clearDisplay() {
+                document.getElementById('gameWorld').innerHTML = '<div class="loading" style="text-align: center; padding: 100px; color: #00ff00; font-size: 24px; text-shadow: 0 0 20px rgba(0, 255, 0, 0.5);">🌍 Choose a scenario above to start watching the world come alive! 🚀</div>';
+                document.getElementById('stepCount').textContent = '0';
+                document.getElementById('entityCount').textContent = '0';
+                document.getElementById('dimensions').textContent = '25x19';
+                document.getElementById('entityList').innerHTML = '<div class="loading">No agents in the world yet</div>';
+                document.getElementById('logList').innerHTML = '<div class="loading">The world is quiet... for now</div>';
+            }
+            
+            showAgentInfo(entity) {
+                const info = `
+                    🎯 Agent: ${entity.type}
+                    📍 Position: [${entity.pos[0]}, ${entity.pos[1]}]
+                    🔋 Energy: ${entity.energy}%
+                    💬 Social: ${entity.social}%
+                    🎭 State: ${entity.state}
+                    ${entity.target ? `🎯 Target: ${entity.target.type}` : ''}
+                `;
+                
+                this.addChatEntry('system', 'info', info);
+            }
+            
+            createParticleEffect(element) {
+                const rect = element.getBoundingClientRect();
+                const gameWorld = document.getElementById('gameWorld');
+                
+                for (let i = 0; i < 8; i++) {
+                    const particle = document.createElement('div');
+                    particle.className = 'particle';
+                    particle.style.left = (rect.left + rect.width / 2) + 'px';
+                    particle.style.top = (rect.top + rect.height / 2) + 'px';
+                    particle.style.background = `hsl(${Math.random() * 360}, 70%, 60%)`;
+                    particle.style.animationDelay = (Math.random() * 0.5) + 's';
+                    
+                    const angle = (Math.PI * 2 * i) / 8;
+                    const velocity = 50 + Math.random() * 30;
+                    particle.style.setProperty('--vx', Math.cos(angle) * velocity + 'px');
+                    particle.style.setProperty('--vy', Math.sin(angle) * velocity + 'px');
+                    
+                    gameWorld.appendChild(particle);
+                    
+                    setTimeout(() => particle.remove(), 2000);
+                }
+            }
+            
+            addChatEntry(type, category, message) {
+                const chatLog = document.getElementById('chatLog');
+                const entry = document.createElement('div');
+                entry.className = 'chat-entry';
+                
+                const timestamp = new Date().toLocaleTimeString('en-US', { 
+                    hour12: false, 
+                    hour: '2-digit', 
+                    minute: '2-digit' 
+                });
+                
+                let content = '';
+                switch(type) {
+                    case 'agent':
+                        content = `<span class="chat-timestamp">${timestamp}</span><span class="chat-speaker">${category}:</span> <span class="chat-message">${message}</span>`;
+                        break;
+                    case 'action':
+                        content = `<span class="chat-timestamp">${timestamp}</span><span class="chat-action">${message}</span>`;
+                        break;
+                    case 'event':
+                        content = `<span class="chat-timestamp">${timestamp}</span><span class="chat-event">${message}</span>`;
+                        break;
+                    case 'system':
+                        content = `<span class="chat-timestamp">${timestamp}</span><span class="chat-event">${message}</span>`;
+                        break;
+                }
+                
+                entry.innerHTML = content;
+                chatLog.appendChild(entry);
+                chatLog.scrollTop = chatLog.scrollHeight;
+            }
+            
+            showError(message) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error';
+                errorDiv.textContent = message;
+                
+                const container = document.querySelector('.container');
+                container.insertBefore(errorDiv, container.firstChild);
+                
+                setTimeout(() => errorDiv.remove(), 5000);
+            }
+        }
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new Agentix();
+        });
+    </script>
+</body>
+</html>

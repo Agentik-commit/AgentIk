@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Agentik</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles.css" />
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background: #0b0f14;
+      color: #e7edf2;
+      overflow: hidden;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    
+    #app {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    #landing {
+      padding: clamp(16px, 4vw, 24px);
+      text-align: center;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      max-width: 100%;
+      overflow-y: auto;
+    }
+    
+    #game {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    
+    .logo {
+      margin: clamp(10px, 3vw, 20px) 0;
+    }
+    
+    .logo-container {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .logo pre {
+      margin: 0;
+      white-space: pre;
+      line-height: clamp(8px, 2vw, 12px);
+      font-size: clamp(6px, 1.5vw, 10px);
+      font-family: 'Courier New', monospace;
+      color: #00ff9a;
+    }
+    
+    .intro {
+      max-width: min(90vw, 600px);
+      margin: clamp(12px, 3vw, 16px) 0 clamp(16px, 4vw, 24px) 0;
+      opacity: 0.9;
+      font-size: clamp(14px, 3vw, 16px);
+      line-height: 1.5;
+    }
+    
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: clamp(6px, 2vw, 10px);
+      margin-top: clamp(8px, 2vw, 10px);
+      width: 100%;
+      max-width: 400px;
+    }
+    
+    .pill {
+      display: inline-block;
+      background: #0ef3a255;
+      color: #071015;
+      padding: clamp(4px, 1.5vw, 6px) clamp(6px, 2vw, 10px);
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: clamp(11px, 2.5vw, 14px);
+      white-space: nowrap;
+    }
+    
+    .cta {
+      background: #00ff88;
+      color: #0b0f14;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      padding: clamp(12px, 3vw, 16px) clamp(20px, 5vw, 24px);
+      cursor: pointer;
+      font-size: clamp(16px, 4vw, 20px);
+      margin-top: clamp(16px, 4vw, 20px);
+      touch-action: manipulation;
+      transition: all 0.2s ease;
+      min-height: 48px; /* Touch-friendly size */
+    }
+    
+    .cta:active {
+      transform: scale(0.95);
+      background: #00e67a;
+    }
+    
+    /* Mobile optimization */
+    @media (max-width: 768px) {
+      .logo pre {
+        font-size: clamp(4px, 2vw, 8px);
+        line-height: clamp(6px, 2.5vw, 10px);
+      }
+      
+      .feature-grid {
+        grid-template-columns: repeat(2, 1fr);
+        max-width: 300px;
+      }
+      
+      .intro {
+        font-size: 14px;
+      }
+      .intro-features { grid-template-columns: 1fr; gap: 12px; max-width: 600px; }
+    }
+    
+    /* Very small screens */
+    @media (max-width: 480px) {
+      #landing {
+        padding: 12px;
+      }
+      
+      .logo pre {
+        font-size: 6px;
+        line-height: 8px;
+      }
+      
+      .pill {
+        font-size: 10px;
+        padding: 3px 6px;
+      }
+    }
+    
+    /* Landscape mobile */
+    @media (max-height: 500px) and (orientation: landscape) {
+      #landing {
+        padding: 8px;
+        justify-content: flex-start;
+      }
+      
+      .logo {
+        margin: 8px 0;
+      }
+      
+      .intro {
+        margin: 8px 0 12px 0;
+        font-size: 12px;
+      }
+      
+      .cta {
+        margin-top: 12px;
+        padding: 8px 16px;
+        font-size: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div id="landing" style="display:block; padding:24px; color:#e7edf2;">
+      <div class="logo">
+        <div class="logo-container">
+<pre class="logo-first" data-text="_____/\\\\\________/\\\\\\__/\\\\\\\\\__/\\\\\_____/\\\__/\\\\\\\\\__/\\\\\\\__/\\\_______/\\\_        
+ ___/\\\\\\\\\____/\\\//////////__\/\\\///////////__\/\\\\\\___\/\\\_\///////\\\/////__\/////\\\///__\///\\\___/\\\/__       
+  __/\\\/////////\\\__/\\\_____________\/\\\_____________\/\\\/\\\__\/\\\_______\/\\\___________\/\\\_______\///\\\\\/____      
+   _\/\\\_______\/\\\_\/\\\____/\\\\\\\_\/\\\\\\\\\_____\/\\\//\\\_\/\\\_______\/\\\___________\/\\\_________\//\\\\______     
+    _\/\\\\\\\\\\\\\\\_\/\\\___\/////\\\_\/\\\///////______\/\\\\//\\\\/\\\_______\/\\\___________\/\\\__________\/\\\\______    
+     _\/\\\/////////\\\_\/\\\_______\/\\\_\/\\\_____________\/\\\_\//\\\/\\\_______\/\\\___________\/\\\__________/\\\\\\_____   
+      _\/\\\_______\/\\\_\/\\\_______\/\\\_\/\\\_____________\/\\\__\//\\\\\\_______\/\\\___________\/\\\________/\\\////\\\___  
+       _\/\\\_______\/\\\_\//\\\\\\\\\\\\/__\/\\\\\\\\\\\\\\\_\/\\\___\//\\\\\_______\/\\\________/\\\\\\\\\__/\\\/___\///\\\_ 
+        _\///________\///___\////////////____\///////////////__\///_____\/////________\///________\///////////__\///_______\///__">_____/\\\\\________/\\\\\\__/\\\\\\\\\__/\\\\\_____/\\\__/\\\\\\\\\__/\\\\\\\__/\\\_______/\\\_        
+ ___/\\\\\\\\\____/\\\//////////__\/\\\///////////__\/\\\\\\___\/\\\_\///////\\\/////__\/////\\\///__\///\\\___/\\\/__       
+  __/\\\/////////\\\__/\\\_____________\/\\\_____________\/\\\/\\\__\/\\\_______\/\\\___________\/\\\_______\///\\\\\/____      
+   _\/\\\_______\/\\\_\/\\\____/\\\\\\\_\/\\\\\\\\\_____\/\\\//\\\_\/\\\_______\/\\\___________\/\\\_________\//\\\\______     
+    _\/\\\\\\\\\\\\\\\_\/\\\___\/////\\\_\/\\\///////______\/\\\\//\\\\/\\\_______\/\\\___________\/\\\__________\/\\\\______    
+     _\/\\\/////////\\\_\/\\\_______\/\\\_\/\\\_____________\/\\\_\//\\\/\\\_______\/\\\___________\/\\\__________/\\\\\\_____   
+      _\/\\\_______\/\\\_\/\\\_______\/\\\_\/\\\_____________\/\\\__\//\\\\\\_______\/\\\___________\/\\\________/\\\////\\\___  
+       _\/\\\_______\/\\\_\//\\\\\\\\\\\\/__\/\\\\\\\\\\\\\\\_\/\\\___\//\\\\\_______\/\\\________/\\\\\\\\\__/\\\/___\///\\\_ 
+        _\///________\///___\////////////____\///////////////__\///_____\/////________\///________\///////////__\///_______\///__</pre>
+
+<pre class="logo-second" data-text="                                                                            
+   _|_|      _|_|_|  _|_|_|_|  _|      _|  _|_|_|_|_|  _|_|_|  _|      _|  
+ _|    _|  _|        _|        _|_|    _|      _|        _|      _|  _|    
+ _|_|_|_|  _|  _|_|  _|_|_|    _|  _|  _|      _|        _|        _|      
+ _|    _|  _|    _|  _|        _|    _|_|      _|        _|      _|  _|    
+ _|    _|    _|_|_|  _|_|_|_|  _|      _|      _|      _|_|_|  _|      _|  
+                                                                            
+                                                                            ">                                                                            
+   _|_|      _|_|_|  _|_|_|_|  _|      _|  _|_|_|_|_|  _|_|_|  _|      _|  
+ _|    _|  _|        _|        _|_|    _|      _|        _|      _|  _|    
+ _|_|_|_|  _|  _|_|  _|_|_|    _|  _|  _|      _|        _|        _|      
+ _|    _|  _|    _|  _|        _|    _|_|      _|        _|      _|  _|    
+ _|    _|    _|_|_|  _|_|_|_|  _|      _|      _|      _|_|_|  _|      _|  
+                                                                            
+                                                                            </pre>
+        </div>
+      </div>
+
+      <div class="intro">
+        <p>Create worlds, spawn autonomous agents, and watch emergent behavior unfold.</p>
+        <div class="feature-grid">
+          <div class="pill">Utility AI</div>
+          <div class="pill">ECS Architecture</div>
+          <div class="pill">Tiled Maps</div>
+          <div class="pill">IndexedDB Saves</div>
+        </div>
+      </div>
+
+      <button id="launch" class="cta">Launch Simulation</button>
+    </div>
+    <div id="game" style="display:none;"></div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('launch')
+      const game = document.getElementById('game')
+      const landing = document.getElementById('landing')
+      if (btn && game && landing) {
+        btn.addEventListener('click', () => {
+          landing.style.display = 'none'
+          game.style.display = 'block'
+        })
+      }
+    })
+  </script>
+  <script>
+    // If embedded in the Flask site, auto-launch sim and suppress landing
+    (function(){
+      const params = new URLSearchParams(location.search)
+      if (params.get('embed') === '1') {
+        window.addEventListener('DOMContentLoaded', () => {
+          const landing = document.getElementById('landing')
+          const game = document.getElementById('game')
+          if (landing && game) { landing.style.display='none'; game.style.display='block' }
+        })
+      }
+    })()
+  </script>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

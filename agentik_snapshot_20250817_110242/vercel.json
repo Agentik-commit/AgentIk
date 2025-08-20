@@ -1,0 +1,5 @@
+{
+  "rewrites": [
+    { "source": "/sim/tinytown/(.*)", "destination": "https://your-tinytown-host/$1" }
+  ]
+}

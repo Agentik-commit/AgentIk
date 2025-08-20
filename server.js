@@ -85,6 +85,7 @@ app.get('/', (req, res) => {
             min-height: 100vh;
             position: relative;
         }
+        /* Theme toggle removed */
         
         body::before {
             content: '';
@@ -99,6 +100,7 @@ app.get('/', (req, res) => {
             pointer-events: none;
             z-index: -1;
         }
+        /* Light theme removed */
         
         /* Modern Header */
         .ascii-header {
@@ -993,6 +995,8 @@ app.get('/', (req, res) => {
     </div>
 
     <!-- removed inline multiverse tab: now served at /multiverse -->
+
+    
 
     <script>
         class Agentik {

@@ -2,7 +2,11 @@ import { defineConfig } from 'vite'
 import path from 'path'
 
 export default defineConfig({
-  build: { outDir: 'dist' },
+  base: './', // Use relative paths for assets
+  build: { 
+    outDir: 'dist',
+    assetsDir: 'assets'
+  },
   server: { port: 5173 },
   resolve: {
     alias: {
